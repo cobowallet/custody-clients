@@ -1,0 +1,16 @@
+*.pyc
+venv/
+
+node_modules
+npm-debug.log*
+.idea
+.vscode
+.DS_Store
+
+coverage
+.coverage
+*.pid
+.npm
+.grunt
+
+vendor

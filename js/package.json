@@ -1,0 +1,18 @@
+{
+  "name": "Cobo_Custody_Js_Client",
+  "version": "1.0.0",
+  "description": "Cobo Custody Js Client",
+  "keywords": [
+    "Cobo",
+    "Custody"
+  ],
+  "scripts": {},
+  "author": "",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "sha256": "0.2.0",
+    "bip66": "1.1.5",
+    "node-fetch": "2.3.0",
+    "elliptic": "6.4.1"
+  }
+}
