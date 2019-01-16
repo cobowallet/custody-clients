@@ -5,6 +5,7 @@ import "time"
 import "io"
 import "strings"
 import "sort"
+import "net/url"
 import "crypto/hmac"
 import ioutil "io/ioutil"
 import hex "encoding/hex"
@@ -29,7 +30,7 @@ func SortParams(params map[string]string) string {
 	sorted := make([]string, len(params))
 	i = 0
 	for _, k := range keys {
-		sorted[i] = k + "=" + params[k]
+		sorted[i] = k + "=" + url.QueryEscape(params[k])
 		i++
 	}
 	return strings.Join(sorted, "&")
@@ -46,33 +47,33 @@ func doubleHash256(s string) string {
 }
 
 func SignEcc(message string) string {
-	api_secret, _ := hex.DecodeString(API_SECRET)
-	privKey, _ := secp256k1.PrivKeyFromBytes(api_secret)
+	decoded_api_secret, _ := hex.DecodeString(api_secret)
+	privKey, _ := secp256k1.PrivKeyFromBytes(decoded_api_secret)
 	sig, _ := privKey.Sign([]byte(doubleHash256(message)))
 	return fmt.Sprintf("%x", sig.Serialize())
 }
 
 func SignHmac(message string) string {
-    h := hmac.New(sha256.New, []byte(API_SECRET))
+    h := hmac.New(sha256.New, []byte(api_secret))
     io.WriteString(h, message)
     return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func Request(method string, path string, params map[string]string) string {
 	client := &http.Client{}
-	nonce := fmt.Sprintf("%d", time.Now().Unix())
+	nonce := fmt.Sprintf("%d", time.Now().Unix() * 1000)
 	sorted := SortParams(params)
 	var req *http.Request
 
 	if method == "POST" {
-		req, _ = http.NewRequest(method, HOST + path, strings.NewReader(sorted))
+		req, _ = http.NewRequest(method, host + path, strings.NewReader(sorted))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	} else {
-		req, _ = http.NewRequest(method, HOST + path + "?" + sorted, strings.NewReader(""))
+		req, _ = http.NewRequest(method, host + path + "?" + sorted, strings.NewReader(""))
 	}
 	content := strings.Join([]string{method, path, nonce, sorted}, "|")
 
-	req.Header.Set("Biz-Api-Key", API_KEY)
+	req.Header.Set("Biz-Api-Key", api_key)
 	req.Header.Set("Biz-Api-Nonce", nonce)
 	if SIG_TYPE == "hmac" {
         req.Header.Set("Biz-Api-Signature", SignHmac(content))
@@ -92,9 +93,6 @@ func Request(method string, path string, params map[string]string) string {
 }
 
 func main() {
-	res := Request("GET", "/v1/custody/transaction_history/", map[string]string{
-		"coin": "LONT_ONT",
-		"side": "deposit",
-	})
+    res := Request("GET", "/v1/custody/org_info/", map[string]string{})
 	fmt.Printf("%v", res)
 }

@@ -31,15 +31,18 @@ const sign_ecc = (message, api_secret) =>{
 };
 
 const sign_hmac = (message, api_secret) => {
-    return crypto.createHmac('sha256', api_secret)
+    console.log(message)
+    var x = crypto.createHmac('sha256', api_secret)
                     .update(message)
                     .digest('hex');
+    console.log(x);
+    return x
 }
 
 const coboFetch = (method, path, params, api_key, api_secret, host = 'https://api.sandbox.cobo.com') => {
     let nonce = String(new Date().getTime());
     let sort_params = Object.keys(params).sort().map((k) => {
-        return k + '=' + encodeURIComponent(params[k]);
+        return k + '=' + encodeURIComponent(params[k]).replace(/%20/g,'+');
     }).join('&');
     let content = [method, path, nonce, sort_params].join('|');
     var signature = '';
@@ -57,12 +60,12 @@ const coboFetch = (method, path, params, api_key, api_secret, host = 'https://ap
         'Biz-Api-Signature': signature
     };
 
-    if (method == 'GET'){
+    if (method == 'GET') {
         return fetch(host + path + '?' + sort_params, {
             'method': method,
             'headers': headers,
         });
-    }else if (method == 'POST'){
+    } else if (method == 'POST') {
         headers['Content-Type'] = "application/x-www-form-urlencoded";
         return fetch(host + path, {
             'method': method,
@@ -74,22 +77,19 @@ const coboFetch = (method, path, params, api_key, api_secret, host = 'https://ap
     }
 }
 
-coboFetch('GET', '/v1/custody/transaction_history/', {'coin': 'LONT_ONT', 'side': 'deposit'}, api_key, api_secret, host)
-    .then(res => {
+coboFetch('POST', '/v1/custody/new_withdraw_request/', 
+        {
+            "coin": "ETH", 
+            "address": "0x8e2782aabdf80fbb69399ce3d9bd5ae69a60462c", 
+            "amount": "100000000000000", 
+            "request_id": "unique_123456",
+            "memo": "hello test"
+        }, 
+        api_key, api_secret, host
+    ).then(res => {
         res.json().then((data)=>{
             console.log(JSON.stringify(data, null, 4));
         })
     }).catch(err => {
         console.log(err)
     });
-
-/*
-coboFetch('POST', '/v1/custody/new_address/', {'coin': 'LONT_ONT'}, api_key, api_secret, host)
-    .then(res => {
-        res.json().then((data)=>{
-            console.log(JSON.stringify(data, null, 4));
-        })
-    }).catch(err => {
-        console.log(err)
-    });
-*/
