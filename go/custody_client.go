@@ -13,9 +13,9 @@ import sha256 "crypto/sha256"
 import secp256k1 "github.com/decred/dcrd/dcrec/secp256k1"
 import http "net/http"
 
-const HOST = "https://api.sandbox.cobo.com"
-const API_KEY = "x"
-const API_SECRET = "x"
+const host = "https://api.sandbox.cobo.com"
+const api_key = "x"
+const api_secret = "x"
 
 const SIG_TYPE = "hmac"
 

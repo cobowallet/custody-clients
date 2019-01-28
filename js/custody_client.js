@@ -7,8 +7,10 @@ const ec = new require('elliptic').ec('secp256k1')
 const ZERO = Buffer.alloc(1, 0)
 
 let host = "https://api.sandbox.cobo.com";
+
 let api_key = "x";
 let api_secret = "x";
+
 let sig_type = 'hmac'
 
 function toDER(x){
