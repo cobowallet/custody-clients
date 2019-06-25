@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group 'com.cobo.custody'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.bitcoinj/bitcoinj-core
+    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.12.1'
+    compile group: 'com.squareup.okio', name: 'okio', version: '2.2.2'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
