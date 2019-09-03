@@ -1,22 +1,37 @@
 package main
 
-import "fmt"
+import (
+	"crypto/rand"
+	"fmt"
+)
 import "time"
 import "io"
 import "strings"
 import "crypto/hmac"
 import "sort"
 import "net/url"
-import ioutil "io/ioutil"
-import hex "encoding/hex"
-import sha256 "crypto/sha256"
-import btcec "github.com/btcsuite/btcd/btcec"
-import http "net/http"
+import "io/ioutil"
+import "encoding/hex"
+import "crypto/sha256"
+import "github.com/btcsuite/btcd/btcec"
+import "net/http"
 
 const HOST = "https://api.sandbox.cobo.com"
 const API_KEY = "x"
 const API_SECRET = "x"
 const SIG_TYPE = "hmac"
+
+func GenerateRandomKeyPair() {
+	apiSecret := make([]byte, 32)
+	if _, err := rand.Read(apiSecret); err != nil {
+		panic(err)
+	}
+	privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), apiSecret)
+	apiKey := fmt.Sprintf("%x", privKey.PubKey().SerializeCompressed())
+	apiSecretStr := fmt.Sprintf("%x", apiSecret)
+
+	fmt.Printf("apiKey: %s, apiSecret: %s\n", apiKey, apiSecretStr)
+}
 
 func SortParams(params map[string]string) string {
 	keys := make([]string, len(params))
@@ -53,6 +68,7 @@ func SignEcc(message string) string {
 	sig, _ := privKey.Sign([]byte(Hash256x2(message)))
 	return fmt.Sprintf("%x", sig.Serialize())
 }
+
 func VerifyEcc(message string, signature string) bool {
 	api_key, _ := hex.DecodeString(API_KEY)
 	pubKey, _ := btcec.ParsePubKey(api_key, btcec.S256())
@@ -63,6 +79,7 @@ func VerifyEcc(message string, signature string) bool {
 	verified := sigObj.Verify([]byte(Hash256x2(message)), pubKey)
 	return verified
 }
+
 func Request(method string, path string, params map[string]string) string {
 	client := &http.Client{}
 	nonce := fmt.Sprintf("%d", time.Now().Unix()*1000)
@@ -94,7 +111,10 @@ func Request(method string, path string, params map[string]string) string {
 	body, _ := ioutil.ReadAll(resp.Body)
 	return string(body)
 }
+
 func main() {
+	//GenerateRandomKeyPair()
+
 	res := Request("GET", "/v1/custody/org_info/", map[string]string{})
 	fmt.Printf("res %v", res)
 	res = Request("GET", "/v1/custody/transaction_history/", map[string]string{
