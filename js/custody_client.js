@@ -7,6 +7,8 @@ const bip66 = require('bip66');
 const fetch = require('node-fetch');
 const ec = new require('elliptic').ec('secp256k1')
 
+const { URLSearchParams } = require('url');
+
 const ZERO = Buffer.alloc(1, 0)
 function toDER(x){
     let i = 0
@@ -51,10 +53,16 @@ const coboFetch = (method, path, params, api_key, api_hex, base = 'https://api.s
             'headers': headers,
         });
     }else if (method == 'POST'){
+
+        let urlParams = new URLSearchParams();
+        for (let k in params){
+            urlParams.append(k, params[k])
+        }
+
         return fetch(base + path, {
             'method': method,
             'headers': headers,
-            'body': JSON.stringify(params)
+            'body': urlParams
         });
     }else{
         throw "unexpected method " + method;
@@ -62,10 +70,10 @@ const coboFetch = (method, path, params, api_key, api_hex, base = 'https://api.s
 }
 
 
-let api_key = 'x';
-let api_hex = 'x';
+let api_key = 'x'
+let api_hex = 'x'
 
-coboFetch('GET', '/v1/custody/org_info/', {}, api_key, api_hex, 'https://tzeng.dev.cobowallet.cn')
+coboFetch('GET', '/v1/custody/org_info/', {}, api_key, api_hex)
     .then(res => {
         console.log(res.status);
         res.json().then((data)=>{
@@ -74,7 +82,16 @@ coboFetch('GET', '/v1/custody/org_info/', {}, api_key, api_hex, 'https://tzeng.d
     }).catch(err => {
         console.log(err)
     });
-coboFetch('GET', '/v1/custody/transaction_history/', {'coin': 'ETH', 'side': 'deposit'}, api_key, api_hex, 'https://tzeng.dev.cobowallet.cn')
+coboFetch('GET', '/v1/custody/transaction_history/', {'coin': 'ETH', 'side': 'deposit'}, api_key, api_hex)
+    .then(res => {
+        console.log(res.status);
+        res.json().then((data)=>{
+            console.log(data);
+        })
+    }).catch(err => {
+        console.log(err)
+    });
+coboFetch('POST', '/v1/custody/new_address/', {"coin": "ETH"}, api_key, api_hex)
     .then(res => {
         console.log(res.status);
         res.json().then((data)=>{
