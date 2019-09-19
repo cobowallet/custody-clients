@@ -12,7 +12,7 @@ import java.util.TreeMap;
 public class Main {
     private static OkHttpClient HTTP_CLIENT = new OkHttpClient();
 
-    private static String DEFAULT_PUBKEY = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876";
+    private static String DEFAULT_PUBKEY = "pubkey(fetch by contact custody developer)";
 
     private static byte[] doubleSha256(String content) {
         return Sha256Hash.hashTwice(content.getBytes());
@@ -64,7 +64,7 @@ public class Main {
 
         String content = method + "|" + path + "|" + nonce + "|" + paramString;
 
-        String signature = generateHmac256Signature(content, apiSecret);
+        String signature = generateEccSignature(content, apiSecret);
 
         Request.Builder builder = new Request.Builder()
                 .addHeader("Biz-Api-Key", apiKey)
@@ -90,7 +90,9 @@ public class Main {
             String ts = response.header("BIZ_TIMESTAMP");
             String sig = response.header("BIZ_RESP_SIGNATURE");
             String body = response.body().string();
+            System.out.println(body);
             boolean verifyResult = verifyResponse(body + "|" + ts, sig, DEFAULT_PUBKEY);
+            System.out.println(verifyResult);
             if (!verifyResult) {
                 throw new RuntimeException("verify response error");
             }
@@ -98,17 +100,22 @@ public class Main {
         }
     }
 
-    public static void _main(String... args) throws Exception {
+    public static void main(String... args) throws Exception {
+        testApi();
+//        testGenerateKeysAndSignMessage();
+    }
+
+    public static void testApi() throws Exception {
         TreeMap<String, Object> params = new TreeMap<>();
         params.put("coin", "BTC");
         String key = "x";
         String secret = "x";
         String host = "https://api.sandbox.cobo.com";
-        String res = request("POST", "/v1/custody/new_address/", params, key, secret, host);
+        String res = request("GET", "/v1/custody/org_info/", params, key, secret, host);
         System.out.println(res);
     }
 
-    public static void main(String... args) {
+    public static void testGenerateKeysAndSignMessage() {
         ECKey key = new ECKey();
         String privHex = bytes2Hex(key.getPrivKeyBytes());
         String pubHex = bytes2Hex(key.getPubKey());
@@ -117,3 +124,5 @@ public class Main {
         System.out.println(generateEccSignature("woshifyz", privHex));
     }
 }
+
+
