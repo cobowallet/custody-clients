@@ -6,6 +6,7 @@ import random
 import time
 from binascii import b2a_hex, a2b_hex
 from cmd import Cmd
+import secrets
 
 try:
     from urllib.parse import urlencode
@@ -14,12 +15,19 @@ except Exception:
 
 from pycoin.key import Key
 
-from pycoin.encoding import from_bytes_32
+from pycoin.encoding import public_pair_to_sec, to_bytes_32, from_bytes_32
 
 import requests
 
 COBO_PUB = 'pubkey'
 
+
+def generate_new_key():
+    secret = secrets.randbits(256)
+    secret_hex = b2a_hex(to_bytes_32(secret)).decode()
+    key = Key(secret_exponent=secret)
+    sec = public_pair_to_sec(key.public_pair())
+    return b2a_hex(sec).decode(), secret_hex
 
 def double_hash256(content):
     return hashlib.sha256(
