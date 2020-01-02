@@ -19,7 +19,7 @@ import "net/http"
 const HOST = "https://api.sandbox.cobo.com"
 const API_KEY = "x"
 const API_SECRET = "x"
-const SIG_TYPE = "hmac"
+const SIG_TYPE = "ecdsa"
 
 func GenerateRandomKeyPair() {
 	apiSecret := make([]byte, 32)
