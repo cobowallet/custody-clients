@@ -1,6 +1,5 @@
 import functools
 import hashlib
-import hmac
 import json
 import random
 import time
@@ -19,7 +18,6 @@ from pycoin.encoding import from_bytes_32
 import requests
 
 COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876"
-FAKE_INNER_SECRET = "FAKE_SECRET"
 
 
 def double_hash256(content):
@@ -34,10 +32,6 @@ def verify(content, signature, pub_key):
 def generate_ecc_signature(content, key):
     key = Key(secret_exponent=from_bytes_32(a2b_hex(key)))
     return b2a_hex(key.sign(double_hash256(content))).decode()
-
-
-def generate_hmac_signature(content, key):
-    return hmac.new(key.encode(), content.encode(), hashlib.sha256).hexdigest()
 
 
 def sort_params(params):
@@ -66,15 +60,11 @@ def request(
     api_key,
     api_secret,
     host="https://api.sandbox.cobo.com",
-    sign_type="hmac",
 ):
     method = method.upper()
     nonce = str(int(time.time() * 1000))
     content = "%s|%s|%s|%s" % (method, path, nonce, sort_params(params))
-    if sign_type == "hmac":
-        sign = generate_hmac_signature(content, api_secret)
-    else:
-        sign = generate_ecc_signature(content, api_secret)
+    sign = generate_ecc_signature(content, api_secret)
 
     headers = {
         "Biz-Api-Key": api_key,
@@ -108,19 +98,16 @@ class Client(Cmd):
         api_key=None,
         api_secret=None,
         host="https://api.sandbox.cobo.com",
-        sign_type="hmac",
     ):
         super(Client, self).__init__()
         assert api_key
         assert api_secret
-        assert sign_type in ("hmac", "ecdsa")
         self.key = api_key
         self.secret = api_secret
         self.host = host
-        self.sign_type = sign_type
 
     def _request(self, method, url, data):
-        res = method(url, data, self.key, self.secret, self.host, self.sign_type)
+        res = method(url, data, self.key, self.secret, self.host)
         print(json.dumps(res, indent=4))
 
     def do_info(self, line):
@@ -366,46 +353,6 @@ class Client(Cmd):
             post, "/v1/custody/hd/add_address/", {"coin": coin, "address": addr}
         )
 
-    def do_etf_exchange_withdraw(self, line):
-        info = line.strip().split()
-        if len(info) not in (4,):
-            print("format: [coin] [amount] [token] [request_id]")
-            return
-
-        coin, amount, token, request_id = info
-
-        return self._request(
-            post,
-            "/v1/custody/inner/etf_exchange_withdraw/",
-            {
-                "coin": coin,
-                "amount": amount,
-                "token": token,
-                "secret": FAKE_INNER_SECRET,
-                "request_id": request_id,
-            },
-        )
-
-    def do_etf_exchange_deposit(self, line):
-        info = line.strip().split()
-        if len(info) not in (4,):
-            print("format: [coin] [amount] [token] [request_id]")
-            return
-
-        coin, amount, token, request_id = info
-
-        return self._request(
-            post,
-            "/v1/custody/inner/etf_exchange_deposit/",
-            {
-                "coin": coin,
-                "amount": amount,
-                "token": token,
-                "secret": FAKE_INNER_SECRET,
-                "request_id": request_id,
-            },
-        )
-
 
 if __name__ == "__main__":
     # Replace by your own keys
@@ -413,7 +360,6 @@ if __name__ == "__main__":
         api_key="x",
         api_secret="x",
         host="https://api.sandbox.cobo.com",
-        sign_type="ecdsa",
     )
 
     client.cmdloop()

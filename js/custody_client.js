@@ -39,7 +39,7 @@ const sign = (message, api_hex) =>{
 const coboFetch = (method, path, params, api_key, api_hex, base = 'https://api.sandbox.cobo.com') => {
     let nonce = String(new Date().getTime());
     let sort_params = Object.keys(params).sort().map((k) => {
-        return k + '=' + encodeURIComponent(params[k]);
+        return k + '=' + encodeURIComponent(params[k]).replace(/%20/g, "+");
     }).join('&');
     let content = [method, path, nonce, sort_params].join('|');
     let headers = {
@@ -100,4 +100,3 @@ coboFetch('POST', '/v1/custody/new_address/', {"coin": "ETH"}, api_key, api_hex)
     }).catch(err => {
         console.log(err)
     });
-

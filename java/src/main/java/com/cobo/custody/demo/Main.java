@@ -12,7 +12,7 @@ import java.util.TreeMap;
 public class Main {
     private static OkHttpClient HTTP_CLIENT = new OkHttpClient();
 
-    private static String DEFAULT_PUBKEY = "pubkey(fetch by contact custody developer)";
+    private static String DEFAULT_PUBKEY = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876";
 
     private static byte[] doubleSha256(String content) {
         return Sha256Hash.hashTwice(content.getBytes());
@@ -24,11 +24,6 @@ public class Main {
 
     private static String bytes2Hex(byte[] b) {
         return ByteString.of(b).hex();
-    }
-
-    private static String generateHmac256Signature(String content, String key) {
-        ByteString k = ByteString.of(key.getBytes());
-        return ByteString.of(content.getBytes()).hmacSha256(k).hex();
     }
 
     private static String generateEccSignature(String content, String key) {
@@ -101,8 +96,8 @@ public class Main {
     }
 
     public static void main(String... args) throws Exception {
+        // testGenerateKeysAndSignMessage();
         testApi();
-//        testGenerateKeysAndSignMessage();
     }
 
     public static void testApi() throws Exception {

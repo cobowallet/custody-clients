@@ -2,6 +2,7 @@
 use  mdanter\ecc;
 $API_KEY = "x";
 $API_SECRET = "x";
+$COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876";
 $HOST = "https://api.sandbox.cobo.com";
 
 require __DIR__ . "/vendor/autoload.php";
@@ -19,6 +20,13 @@ function sign_ecdsa($message){
     $key = $ec->keyFromPrivate($API_SECRET);
     return $key->sign(bin2hex($message))->toDER('hex');
 }
+function verify_ecdsa($message, $timestamp, $signature){
+    global $COBO_PUB;
+    $message = hash("sha256", hash("sha256", "{$message}|{$timestamp}", True), True);
+    $ec = new EC('secp256k1');
+    $key = $ec->keyFromPublic($COBO_PUB, "hex");
+    return $key->verify(bin2hex($message), $signature);
+}
 function sort_data($data){
     ksort($data);
     $result = [];
@@ -34,6 +42,7 @@ function request($method, $path, $data){
     $sorted_data = sort_data($data);
     $nonce = time() * 1000;
     curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt ($ch, CURLOPT_HEADER, 1);
     curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt ($ch, CURLOPT_HTTPHEADER, [
         "Biz-Api-Key:".$API_KEY,
@@ -47,9 +56,16 @@ function request($method, $path, $data){
     } else {
         curl_setopt ($ch, CURLOPT_URL, $HOST.$path."?".$sorted_data);
     }
-    $file_contents = curl_exec($ch);
+    list($header, $body) = explode("\r\n\r\n", curl_exec($ch), 2);
+    preg_match("/biz_timestamp: (?<timestamp>[0-9]*)/", $header, $match);
+    $timestamp = $match["timestamp"];
+    preg_match("/biz_resp_signature: (?<signature>[0-9abcdef]*)/", $header, $match);
+    $signature = $match["signature"];
+    if (verify_ecdsa($body, $timestamp, $signature) != 1){
+        throw new Exception("signature verify fail");
+    }
     curl_close($ch);
-    return $file_contents;
+    return $body;
 }
 function generate(){
     $ec = new EC('secp256k1');
