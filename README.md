@@ -5,9 +5,15 @@ Cobo Custody Api Client Demo
 * Python
     - python3.6
     - pip install -r requirements.txt
+    - python custody_key.py
+    - register API_KEY on Custody Web
+    - replace API_KEY, API_SECRET in custody_client.py
     - python custody_client.py
 
 * Go
+    - go run custody_key.go
+    - register API_KEY on Custody Web
+    - replace API_KEY, API_SECRET in custody_client.go
     - go run custody_client.go
 
 * Js

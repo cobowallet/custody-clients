@@ -16,22 +16,9 @@ import "crypto/sha256"
 import "github.com/btcsuite/btcd/btcec"
 import "net/http"
 
-const HOST = "https://api.sandbox.cobo.com"
 const API_KEY = "x"
 const API_SECRET = "x"
-const SIG_TYPE = "ecdsa"
-
-func GenerateRandomKeyPair() {
-	apiSecret := make([]byte, 32)
-	if _, err := rand.Read(apiSecret); err != nil {
-		panic(err)
-	}
-	privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), apiSecret)
-	apiKey := fmt.Sprintf("%x", privKey.PubKey().SerializeCompressed())
-	apiSecretStr := fmt.Sprintf("%x", apiSecret)
-
-	fmt.Printf("apiKey: %s, apiSecret: %s\n", apiKey, apiSecretStr)
-}
+const HOST = "https://api.sandbox.cobo.com"
 
 func SortParams(params map[string]string) string {
 	keys := make([]string, len(params))
@@ -56,11 +43,6 @@ func Hash256(s string) string {
 }
 func Hash256x2(s string) string {
 	return Hash256(Hash256(s))
-}
-func SignHmac(message string) string {
-	h := hmac.New(sha256.New, []byte(API_SECRET))
-	io.WriteString(h, message)
-	return fmt.Sprintf("%x", h.Sum(nil))
 }
 func SignEcc(message string) string {
 	api_secret, _ := hex.DecodeString(API_SECRET)
@@ -95,14 +77,7 @@ func Request(method string, path string, params map[string]string) string {
 
 	req.Header.Set("Biz-Api-Key", API_KEY)
 	req.Header.Set("Biz-Api-Nonce", nonce)
-	if SIG_TYPE == "hmac" {
-		req.Header.Set("Biz-Api-Signature", SignHmac(content))
-	} else if SIG_TYPE == "ecdsa" {
-		req.Header.Set("Biz-Api-Signature", SignEcc(content))
-	} else {
-		fmt.Printf("Not supported signature type")
-		return ""
-	}
+	req.Header.Set("Biz-Api-Signature", SignEcc(content))
 
 	resp, _ := client.Do(req)
 
@@ -113,8 +88,6 @@ func Request(method string, path string, params map[string]string) string {
 }
 
 func main() {
-	//GenerateRandomKeyPair()
-
 	res := Request("GET", "/v1/custody/org_info/", map[string]string{})
 	fmt.Printf("res %v", res)
 	res = Request("GET", "/v1/custody/transaction_history/", map[string]string{

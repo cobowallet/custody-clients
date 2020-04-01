@@ -13,13 +13,14 @@ except Exception:
 
 from pycoin.key import Key
 
-from pycoin.encoding import public_pair_to_sec, to_bytes_32, from_bytes_32
+from pycoin.encoding import from_bytes_32
 
 import requests
-import secrets
 
 COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876"
-
+API_KEY = "x"
+API_SECRET = "x"
+HOST = "https://api.sandbox.cobo.com"
 
 def double_hash256(content):
     return hashlib.sha256(hashlib.sha256(content.encode()).digest()).digest()
@@ -28,13 +29,6 @@ def double_hash256(content):
 def verify(content, signature, pub_key):
     key = Key.from_sec(a2b_hex(pub_key))
     return key.verify(double_hash256(content), a2b_hex(signature))
-
-def generate_new_key():
-    secret = secrets.randbits(256)
-    secret_hex = b2a_hex(to_bytes_32(secret)).decode()
-    key = Key(secret_exponent=secret)
-    sec = public_pair_to_sec(key.public_pair())
-    return b2a_hex(sec).decode(), secret_hex
 
 def generate_ecc_signature(content, key):
     key = Key(secret_exponent=from_bytes_32(a2b_hex(key)))
@@ -66,7 +60,6 @@ def request(
     params,
     api_key,
     api_secret,
-    host="https://api.sandbox.cobo.com",
 ):
     method = method.upper()
     nonce = str(int(time.time() * 1000))
@@ -80,10 +73,10 @@ def request(
     }
     if method == "GET":
         resp = requests.get(
-            "%s%s" % (host, path), params=urlencode(params), headers=headers
+            "%s%s" % (HOST, path), params=urlencode(params), headers=headers
         )
     elif method == "POST":
-        resp = requests.post("%s%s" % (host, path), data=params, headers=headers)
+        resp = requests.post("%s%s" % (HOST, path), data=params, headers=headers)
     else:
         raise Exception("Not support http method")
     verify_success, result = verify_response(resp)
@@ -104,17 +97,15 @@ class Client(Cmd):
         self,
         api_key=None,
         api_secret=None,
-        host="https://api.sandbox.cobo.com",
     ):
         super(Client, self).__init__()
         assert api_key
         assert api_secret
         self.key = api_key
         self.secret = api_secret
-        self.host = host
 
     def _request(self, method, url, data):
-        res = method(url, data, self.key, self.secret, self.host)
+        res = method(url, data, self.key, self.secret)
         print(json.dumps(res, indent=4))
 
     def do_info(self, line):
@@ -364,9 +355,8 @@ class Client(Cmd):
 if __name__ == "__main__":
     # Replace by your own keys
     client = Client(
-        api_key="x",
-        api_secret="x",
-        host="https://api.sandbox.cobo.com",
+        api_key=API_KEY,
+        api_secret=API_SECRET,
     )
 
     client.cmdloop()
