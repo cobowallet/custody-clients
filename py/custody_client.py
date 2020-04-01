@@ -13,9 +13,10 @@ except Exception:
 
 from pycoin.key import Key
 
-from pycoin.encoding import from_bytes_32
+from pycoin.encoding import public_pair_to_sec, to_bytes_32, from_bytes_32
 
 import requests
+import secrets
 
 COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876"
 
@@ -28,6 +29,12 @@ def verify(content, signature, pub_key):
     key = Key.from_sec(a2b_hex(pub_key))
     return key.verify(double_hash256(content), a2b_hex(signature))
 
+def generate_new_key():
+    secret = secrets.randbits(256)
+    secret_hex = b2a_hex(to_bytes_32(secret)).decode()
+    key = Key(secret_exponent=secret)
+    sec = public_pair_to_sec(key.public_pair())
+    return b2a_hex(sec).decode(), secret_hex
 
 def generate_ecc_signature(content, key):
     key = Key(secret_exponent=from_bytes_32(a2b_hex(key)))
