@@ -114,7 +114,7 @@ public class Main {
         ECKey key = new ECKey();
         String privHex = bytes2Hex(key.getPrivKeyBytes());
         String pubHex = bytes2Hex(key.getPubKey());
-        System.out.println("private key: " + privHex + "; public key: " + pubHex);
+        System.out.println("API_KEY: " + privHex + "; API_SECRET: " + pubHex);
 
         System.out.println(generateEccSignature("woshifyz", privHex));
     }

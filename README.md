@@ -18,10 +18,20 @@ Cobo Custody Api Client Demo
 
 * Js
     - npm install
+    - node custody_key.js
+    - register API_KEY on Custody Web
+    - replace API_KEY API_SECRET in custody_client.js
     - node custody_client.js
 
 * Java
     - com/cobo/custody/demo/Main.java
+    - run testGenerateKeysAndSignMessage to get API_KEY, API_SECRET
+    - register API_KEY on Custody Web
+    - replace API_KEY API_SECRET in testApi key, secret and run testApi
 
 * Php
+    - composer require simplito/elliptic-php
+    - php custody_key.php
+    - register API_KEY on Custody Web
+    - replace API_KEY API_SECRET in custody_client.php
     - php custody_client.php

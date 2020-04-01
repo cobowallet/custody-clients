@@ -67,12 +67,5 @@ function request($method, $path, $data){
     curl_close($ch);
     return $body;
 }
-function generate(){
-    $ec = new EC('secp256k1');
-    $key = $ec->genKeyPair();
-    echo $key->getPublic(true, "hex");
-    echo "\n";
-    echo $key->getPrivate("hex");
-}
 echo request("GET", "/v1/custody/coin_info/", ["coin" => "BTC"]);
 echo request("POST", "/v1/custody/new_address/", ["coin" => "BTC"]);

@@ -17,10 +17,10 @@ from pycoin.encoding import from_bytes_32
 
 import requests
 
-COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876"
 API_KEY = "x"
 API_SECRET = "x"
 HOST = "https://api.sandbox.cobo.com"
+COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876"
 
 def double_hash256(content):
     return hashlib.sha256(hashlib.sha256(content.encode()).digest()).digest()
