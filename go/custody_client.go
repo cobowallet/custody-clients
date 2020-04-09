@@ -1,13 +1,8 @@
 package main
 
-import (
-	"crypto/rand"
-	"fmt"
-)
+import "fmt"
 import "time"
-import "io"
 import "strings"
-import "crypto/hmac"
 import "sort"
 import "net/url"
 import "io/ioutil"
@@ -19,6 +14,7 @@ import "net/http"
 const API_KEY = "x"
 const API_SECRET = "x"
 const HOST = "https://api.sandbox.cobo.com"
+const COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876"
 
 func SortParams(params map[string]string) string {
 	keys := make([]string, len(params))
@@ -52,8 +48,8 @@ func SignEcc(message string) string {
 }
 
 func VerifyEcc(message string, signature string) bool {
-	api_key, _ := hex.DecodeString(API_KEY)
-	pubKey, _ := btcec.ParsePubKey(api_key, btcec.S256())
+	pub_key, _ := hex.DecodeString(COBO_PUB)
+	pubKey, _ := btcec.ParsePubKey(pub_key, btcec.S256())
 
 	sigBytes, _ := hex.DecodeString(signature)
 	sigObj, _ := btcec.ParseSignature(sigBytes, btcec.S256())
@@ -84,15 +80,20 @@ func Request(method string, path string, params map[string]string) string {
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
+
+	timestamp := resp.Header["Biz-Timestamp"][0]
+	signature := resp.Header["Biz-Resp-Signature"][0]
+	success := VerifyEcc(string(body)+"|"+timestamp, signature)
+	fmt.Println("verify success?", success)
 	return string(body)
 }
 
 func main() {
 	res := Request("GET", "/v1/custody/org_info/", map[string]string{})
-	fmt.Printf("res %v", res)
+	fmt.Println("res", res)
 	res = Request("GET", "/v1/custody/transaction_history/", map[string]string{
 		"coin": "ETH",
 		"side": "deposit",
 	})
-	fmt.Printf("res %v", res)
+	fmt.Println("res", res)
 }
