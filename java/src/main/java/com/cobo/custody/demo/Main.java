@@ -10,9 +10,12 @@ import java.net.URLEncoder;
 import java.util.TreeMap;
 
 public class Main {
-    private static OkHttpClient HTTP_CLIENT = new OkHttpClient();
+    private static String API_KEY = "x";
+    private static String API_SECRET = "x";
+    private static String HOST = "https://api.sandbox.cobo.com";
+    private static String COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876";
 
-    private static String DEFAULT_PUBKEY = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876";
+    private static OkHttpClient HTTP_CLIENT = new OkHttpClient();
 
     private static byte[] doubleSha256(String content) {
         return Sha256Hash.hashTwice(content.getBytes());
@@ -85,9 +88,8 @@ public class Main {
             String ts = response.header("BIZ_TIMESTAMP");
             String sig = response.header("BIZ_RESP_SIGNATURE");
             String body = response.body().string();
-            System.out.println(body);
-            boolean verifyResult = verifyResponse(body + "|" + ts, sig, DEFAULT_PUBKEY);
-            System.out.println(verifyResult);
+            boolean verifyResult = verifyResponse(body + "|" + ts, sig, COBO_PUB);
+            System.out.println("verify success? " + verifyResult);
             if (!verifyResult) {
                 throw new RuntimeException("verify response error");
             }
@@ -96,17 +98,17 @@ public class Main {
     }
 
     public static void main(String... args) throws Exception {
-        // testGenerateKeysAndSignMessage();
-        testApi();
+        if (args.length == 1 && args[0].equals("key")){
+            testGenerateKeysAndSignMessage();
+        } else {
+            testApi();
+        }
     }
 
     public static void testApi() throws Exception {
         TreeMap<String, Object> params = new TreeMap<>();
         params.put("coin", "BTC");
-        String key = "x";
-        String secret = "x";
-        String host = "https://api.sandbox.cobo.com";
-        String res = request("GET", "/v1/custody/org_info/", params, key, secret, host);
+        String res = request("GET", "/v1/custody/org_info/", params, API_KEY, API_SECRET, HOST);
         System.out.println(res);
     }
 
@@ -117,5 +119,3 @@ public class Main {
         System.out.println("API_KEY: " + pubHex + "; API_SECRET: " + privHex);
     }
 }
-
-

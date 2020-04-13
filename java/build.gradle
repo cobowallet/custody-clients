@@ -19,3 +19,14 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+apply plugin: 'application'
+mainClassName = 'com.cobo.custody.demo.Main'
+
+task key(type: JavaExec) {
+    group = "Execution"
+    description = "Run the main class with JavaExecTask"
+    classpath = sourceSets.main.runtimeClasspath
+    main = mainClassName
+    args "key"
+}

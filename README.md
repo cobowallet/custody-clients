@@ -28,10 +28,14 @@ More info: [API Documentation](https://doc.custody.cobo.com/)
     - node custody_client.js
 
 * Java
-    - com/cobo/custody/demo/Main.java
-    - run testGenerateKeysAndSignMessage to get API_KEY, API_SECRET
+    - use your IDE to manage com/cobo/custody/demo/Main.java
+    - OR
+    - gradle build
+    - gradle key
     - register API_KEY on Custody Web
-    - replace API_KEY API_SECRET in testApi key, secret and run testApi
+    - replace API_KEY API_SECRET in com/cobo/custody/demo/Main.java
+    - gradle build
+    - gradle run
 
 * Php
     - composer require simplito/elliptic-php
