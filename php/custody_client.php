@@ -57,9 +57,9 @@ function request($method, $path, $data){
         curl_setopt ($ch, CURLOPT_URL, $HOST.$path."?".$sorted_data);
     }
     list($header, $body) = explode("\r\n\r\n", curl_exec($ch), 2);
-    preg_match("/biz_timestamp: (?<timestamp>[0-9]*)/", $header, $match);
+    preg_match("/biz_timestamp: (?<timestamp>[0-9]*)/i", $header, $match);
     $timestamp = $match["timestamp"];
-    preg_match("/biz_resp_signature: (?<signature>[0-9abcdef]*)/", $header, $match);
+    preg_match("/biz_resp_signature: (?<signature>[0-9abcdef]*)/i", $header, $match);
     $signature = $match["signature"];
     if (verify_ecdsa($body, $timestamp, $signature) != 1){
         throw new Exception("signature verify fail");
