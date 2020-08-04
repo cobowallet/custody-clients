@@ -1,9 +1,9 @@
 <?php
 use  mdanter\ecc;
-$API_KEY = "037ae1542d92b6c80fb4fc3550faf78a23d79aa7dc46c78580ae4b8d862750ca04";
-$API_SECRET = "f6eba4694090e1abe5ae048b5d0d7cc75a59d1adda03a3e4d84492456cff9b7c";
+$API_KEY = "x";
+$API_SECRET = "x";
 $COBO_PUB = "032f45930f652d72e0c90f71869dfe9af7d713b1f67dc2f7cb51f9572778b9c876";
-$HOST = "https://custody.stage.cobowallet.cn";
+$HOST = "https://api.sandbox.cobo.com";
 
 require __DIR__ . "/vendor/autoload.php";
 
